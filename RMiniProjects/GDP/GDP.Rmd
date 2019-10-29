@@ -1,0 +1,89 @@
+---
+title: "GDP"
+author: "Olivia Leeson"
+output: 
+  html_document:
+    keep md: TRUE
+---
+
+## Motivation
+The purpose of this analysis is to understand the relationship between GDP and income for countries around the globe based on data from 2015. 
+Which 10 countries have the highest GDPs, and which 10 countries have the lowest GDP?
+What are the average GDP rankings for the High income: OECD and High income: non-OECD countries? (OECD countries belong to the intergovernmental organization 'Organization for Economic Coorperation and Development')?
+How many countries are Lower middle income but among the 38 nations with highest
+GDP?  
+
+## The Data
+Two raw csv files: one containing the GDP information and another containing other important economic statistics such as income group. The worldbank data are updated retroactively to reflect the most recent updates on the 2015 statistics. Run a makefile that includes the code to gather, clean, and merge the raw data files.
+```{r}
+source("makefile")
+summary(both, n=3)
+```
+The remaining dataset includes 189 countries with data on the the GDP in Millions and the Income Group of those countries.  
+
+
+### Which 10 countries have the highest GDPs, and which 10 countries have the lowest GDP?
+Which country ranks #13 in the ascending list of GDPs?
+```{r}
+both$Rank <- as.numeric(gsub("[^[:digit:]]","", both$ID))
+both$Country.y[both$Rank <11]
+```
+
+```{r}
+both$Country.y[both$Rank >178]
+```
+
+### What is the average GDP rankings for the High Income: OECD countries?
+```{r}
+highoecd <- (both$Rank[both$Income.Group=="High income: OECD"])
+sumhighoecd <- sum(highoecd)
+counthighoecd <- length(highoecd)
+avghighoecd <- sumhighoecd/counthighoecd
+avghighoecd
+```
+The average GDP rankings for the High Income: OECD countries is 32.9, or about 33.   
+
+### What is the average GDP rankings for the High Income: nonOECD countries?
+```{r}
+highnon <- (both$Rank[both$Income.Group=="High income: nonOECD"])
+sumhighnon <- sum(highnon)
+counthighnon<- length(highnon)
+avghighnon<- sumhighnon/counthighnon
+avghighnon
+```
+The average GDP rankings for the High Income: nonOECD countries is 91.9, or about 92.  
+
+The average rankings of the High Income countries shows that the countries in OECD have, on average, higher GDPs thank those countries with high incomes but are not part of OECD.
+
+### Scatter Plot of GDP for all Countries
+```{r}
+library(ggplot2)
+p <- ggplot(both, aes(Rank,GDP_Mills))
+P <- p + geom_point()
+p <- p + geom_point(aes(colour=factor(Income.Group)))
+p
+```
+  
+The United States clearly has the highest GDP by far. The scatter plot is hard to read because the U.S. is an outlier for this data. We can see that there is a huge GDP disparity between the top 5 countries and the rest. 
+```{r}
+tail(both$C_Code, n=5)
+```
+The top 5 countries in GDP are USA, China, Japan, Germany, and France
+
+
+### GDP Rankings versus Income Group
+```{r}
+both$qnt <- cut(both$Rank, breaks=quantile(both$Rank, probs=seq(0,1,0.2)), labels=1:5, include.lowest=TRUE)
+otable <- table(both$Income.Group, both$qnt)
+otable
+```
+The numbers of the quartiles are 1-5. 
+1 being in the top 20% and 5 being in the bottom 20%. 
+We can tell from the table that for the Lower-middle income group, 5 countries are in the top 20% in GDP, 13 in the 20-40%, 11 in the 40-60%, 9 in the 60-80%, and 16 countries are in the bottom 20% in GDP. 
+
+There are 5 countries that are lower-middle income but among the top 38 nations with the highest GDP. 
+
+
+
+## Conclusion
+By running analysis on countries given their GDP and Income Groups we can glean insights into which countries lead the world in production and consumption. A few countries have disproportionally high GDPs, and most countries have relatively similar GDPs. Income Group is a good indication of how high that country's GDP will be, but there are still cases where low income countries have high GDPs. This is likely due to the fact that GDP is calculated on a number of other factors besides income. There is much more analysis that we can explore with this data. Please use this data as presented on github to contribute to this analysis. 
